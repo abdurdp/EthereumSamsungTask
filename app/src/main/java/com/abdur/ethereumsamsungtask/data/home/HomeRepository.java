@@ -1,0 +1,58 @@
+package com.abdur.ethereumsamsungtask.data.home;
+
+import androidx.annotation.NonNull;
+import androidx.lifecycle.MutableLiveData;
+
+import com.abdur.ethereumsamsungtask.data.source.APIClient;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import timber.log.Timber;
+
+public class HomeRepository {
+    private static final String API_KEY = "2GRD2ZMNTSRQTSI7YW9TV31Q22N42BHBVS";
+    private static HomeRepository repository;
+    private static HomeAPI homeAPI;
+
+    public HomeRepository() {
+        homeAPI = APIClient.createService(HomeAPI.class);
+    }
+
+    public static HomeRepository getInstance() {
+        if (repository == null) {
+            repository = new HomeRepository();
+        }
+
+        return repository;
+    }
+
+    public MutableLiveData<BlockChainResponse> getBalance(String address) {
+        MutableLiveData<BlockChainResponse> data = new MutableLiveData<>();
+        homeAPI.getBalance("account","balance",address,"latest",API_KEY).enqueue(new Callback<BlockChainResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<BlockChainResponse> call,
+                                   @NonNull Response<BlockChainResponse> response) {
+
+                if (response.isSuccessful()) {
+                    data.setValue(response.body());
+                } else {
+                    BlockChainResponse apiResponse = new BlockChainResponse();
+                    apiResponse.setError(true);
+                    if (response.body() != null) {
+                        apiResponse.setMessage(response.body().getMessage());
+                    }
+                    data.setValue(apiResponse);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<BlockChainResponse> call, @NonNull Throwable t) {
+                Timber.e(t.getCause());
+                data.setValue(null);
+            }
+        });
+        return data;
+    }
+
+}
