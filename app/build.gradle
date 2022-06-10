@@ -21,6 +21,8 @@ android {
             versionNameSuffix '-DEBUG'
             debuggable true
             minifyEnabled false
+            buildConfigField "String", "BASE_URL", "\"https://api.etherscan.io/\""
+            buildConfigField "String", "API_KEY", "\"2GRD2ZMNTSRQTSI7YW9TV31Q22N42BHBVS\""
         }
 
         release {
@@ -28,6 +30,8 @@ android {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField "String", "BASE_URL", "\"https://api.etherscan.io/\""
+            buildConfigField "String", "API_KEY", "\"2GRD2ZMNTSRQTSI7YW9TV31Q22N42BHBVS\""
         }
     }
     compileOptions {

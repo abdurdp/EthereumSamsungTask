@@ -1,5 +1,6 @@
 package com.abdur.ethereumsamsungtask.data.source;
 
+import com.abdur.ethereumsamsungtask.BuildConfig;
 import com.google.gson.GsonBuilder;
 
 import java.util.concurrent.TimeUnit;
@@ -29,7 +30,7 @@ public class APIClient {
                 .build();
 
         retrofit = new Retrofit.Builder()
-                .baseUrl("https://api.etherscan.io/")
+                .baseUrl(BuildConfig.BASE_URL)
                 .addConverterFactory(GsonConverterFactory
                         .create(new GsonBuilder().serializeNulls().create()))
                 .client(httpClient)

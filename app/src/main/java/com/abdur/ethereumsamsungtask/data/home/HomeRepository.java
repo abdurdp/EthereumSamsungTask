@@ -3,6 +3,7 @@ package com.abdur.ethereumsamsungtask.data.home;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
 
+import com.abdur.ethereumsamsungtask.BuildConfig;
 import com.abdur.ethereumsamsungtask.data.source.APIClient;
 
 import retrofit2.Call;
@@ -11,7 +12,6 @@ import retrofit2.Response;
 import timber.log.Timber;
 
 public class HomeRepository {
-    private static final String API_KEY = "2GRD2ZMNTSRQTSI7YW9TV31Q22N42BHBVS";
     private static HomeRepository repository;
     private static HomeAPI homeAPI;
 
@@ -29,7 +29,7 @@ public class HomeRepository {
 
     public MutableLiveData<BlockChainResponse> getBalance(String address) {
         MutableLiveData<BlockChainResponse> data = new MutableLiveData<>();
-        homeAPI.getBalance("account","balance",address,"latest",API_KEY).enqueue(new Callback<BlockChainResponse>() {
+        homeAPI.getBalance("account","balance",address,"latest", BuildConfig.API_KEY).enqueue(new Callback<BlockChainResponse>() {
             @Override
             public void onResponse(@NonNull Call<BlockChainResponse> call,
                                    @NonNull Response<BlockChainResponse> response) {
