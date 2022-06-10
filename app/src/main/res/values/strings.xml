@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">EthereumSamsungTask</string>
+    <string name="balance">Balance:</string>
+    <string name="enter_address">Enter Address</string>
+    <string name="or">OR</string>
+    <string name="scan_qr_code">Scan QR Code</string>
+    <string name="submit">submit</string>
+    <string name="qr_code_image">Qr code image</string>
+    <string name="cancel_scanner">cancel scanner</string>
 </resources>

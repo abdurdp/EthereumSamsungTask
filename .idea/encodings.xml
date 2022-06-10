@@ -3,5 +3,6 @@
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/app/src/main/java/com/abdur/ethereumsamsungtask/data/home/HomeRepository.java" charset="ISO-8859-1" />
     <file url="file://$PROJECT_DIR$/app/src/main/java/com/abdur/ethereumsamsungtask/data/home/HomeViewModel.java" charset="ISO-8859-1" />
+    <file url="file://$PROJECT_DIR$/app/src/main/res/drawable/ic_qr_scanner.xml" charset="ISO-8859-1" />
   </component>
 </project>
