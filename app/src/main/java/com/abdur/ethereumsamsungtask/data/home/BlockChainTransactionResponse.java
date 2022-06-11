@@ -2,10 +2,12 @@ package com.abdur.ethereumsamsungtask.data.home;
 
 import com.google.gson.annotations.SerializedName;
 
-public class BlockChainResponse {
+import java.util.List;
+
+public class BlockChainTransactionResponse {
 
     @SerializedName("result")
-    private String result;
+    private List<ResultItem> result;
 
     @SerializedName("message")
     private String message;
@@ -14,7 +16,7 @@ public class BlockChainResponse {
     private String status;
     private boolean error;
 
-    public String getResult() {
+    public List<ResultItem> getResult() {
         return result;
     }
 

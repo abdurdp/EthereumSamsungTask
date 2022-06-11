@@ -1,13 +1,5 @@
 package com.abdur.ethereumsamsungtask;
 
-import androidx.activity.result.ActivityResultCallback;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.lifecycle.ViewModelProvider;
-
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -17,7 +9,19 @@ import android.view.SurfaceHolder;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.abdur.ethereumsamsungtask.adapter.TransactionAdapter;
 import com.abdur.ethereumsamsungtask.data.home.HomeViewModel;
+import com.abdur.ethereumsamsungtask.data.home.ResultItem;
 import com.abdur.ethereumsamsungtask.databinding.ActivityMainBinding;
 import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.Detector;
@@ -25,6 +29,7 @@ import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
 
 import java.io.IOException;
+import java.util.List;
 
 import timber.log.Timber;
 
@@ -35,9 +40,10 @@ public class MainActivity extends AppCompatActivity {
     private Context context;
     protected BarcodeDetector barcodeDetector;
     private CameraSource cameraSource;
-    private String address ="0x18D0dBc5Bbba31782299ce4b83CFE4d6d150f13a";
+    private String address = "0xddbd2b932c763ba5b1b7ae3b362eac3e8d40121a";
 
     String intentData = "";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
         binding.clQRCode.setOnClickListener(v -> {
             binding.clQRCode.setVisibility(View.GONE);
             binding.clScanner.setVisibility(View.VISIBLE);
-            if(cameraSource==null) initialiseDetectorsAndSources();
+            if (cameraSource == null) initialiseDetectorsAndSources();
             else {
                 try {
                     if (ActivityCompat.checkSelfPermission(context, Manifest.permission.CAMERA) ==
@@ -78,12 +84,27 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         binding.submit.setOnClickListener(v -> {
-            if(binding.etAddress.getText().toString().length()==42 && binding.etAddress.getText().toString().startsWith("0x")){
-                getBalance(binding.etAddress.getText().toString());
+            if (binding.etAddress.getText().toString().length() == 42 && binding.etAddress.getText().toString().startsWith("0x")) {
+                address = binding.etAddress.getText().toString().trim();
+                getBalance(address);
+            } else
+                Toast.makeText(context, "Please enter a valid address", Toast.LENGTH_SHORT).show();
+        });
+        binding.rbgAction.setOnCheckedChangeListener((group, checkedId) -> {
+            if (checkedId == binding.rbBalance.getId()) {
+                binding.clTransaction.setVisibility(View.GONE);
+                getBalance(address);
+            } else {
+                binding.clTransaction.setVisibility(View.VISIBLE);
+                getTransaction(address);
             }
-            else Toast.makeText(context, "Please enter a valid address", Toast.LENGTH_SHORT).show();
+        });
+
+        binding.btnClose.setOnClickListener(v -> {
+            binding.clTransaction.setVisibility(View.GONE);
         });
     }
+
 
     @Override
     protected void onResume() {
@@ -92,22 +113,55 @@ public class MainActivity extends AppCompatActivity {
 
     private void getBalance(String mAddress) {
         binding.progressCircular.setVisibility(View.VISIBLE);
-        homeViewModel.initViewModel(mAddress);
+        homeViewModel.initViewModel(mAddress, "ACTION_BALANCE");
         homeViewModel.getBalanceLiveData().observe(this, apiResponse -> {
             binding.progressCircular.setVisibility(View.GONE);
-            if(apiResponse!=null){
-                if(!apiResponse.getError()){
-                    Timber.d("APIResponse :%s",apiResponse);
+            if (apiResponse != null) {
+                if (!apiResponse.getError()) {
+                    Timber.d("APIResponse :%s", apiResponse);
                     binding.tvBalance.setText(apiResponse.getResult());
-                }else{
+                } else {
 
                     Toast.makeText(context, "Something went wrong!!", Toast.LENGTH_SHORT).show();
                 }
-            }else{
+            } else {
                 Toast.makeText(context, "No Data found!!", Toast.LENGTH_SHORT).show();
             }
 
         });
+    }
+
+    private void getTransaction(String mAddress) {
+        binding.progressCircular.setVisibility(View.VISIBLE);
+        homeViewModel.initViewModel(mAddress, "ACTION_TRANSACTION");
+        homeViewModel.getTransactionLiveData().observe(this, apiResponse -> {
+            binding.progressCircular.setVisibility(View.GONE);
+            if (apiResponse != null) {
+                if (!apiResponse.getError()) {
+                    Timber.d("APIResponse :%s", apiResponse);
+                    List<ResultItem> resultItemList = apiResponse.getResult();
+                    if (!resultItemList.isEmpty()) {
+                        setRVAdapter(resultItemList);
+                    } else {
+                        Toast.makeText(context, apiResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+
+                    Toast.makeText(context, "Something went wrong!!", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Toast.makeText(context, "No Data found!!", Toast.LENGTH_SHORT).show();
+            }
+
+        });
+    }
+
+    private void setRVAdapter(List<ResultItem> resultItemList) {
+        binding.rvTransaction.setHasFixedSize(true);
+        binding.rvTransaction.setLayoutManager(new LinearLayoutManager(context, RecyclerView.VERTICAL, false));
+        TransactionAdapter transactionAdapter = new TransactionAdapter(resultItemList);
+        binding.rvTransaction.setAdapter(transactionAdapter);
+
     }
 
     private void initialiseDetectorsAndSources() {
@@ -164,12 +218,17 @@ public class MainActivity extends AppCompatActivity {
                     binding.txtBarcodeValue.post(() -> {
                         try {
                             intentData = barcodes.valueAt(0).displayValue;
-                            if(intentData.length()==42 && intentData.startsWith("0x")){
+                            if (intentData.length() == 42 && intentData.startsWith("0x")) {
                                 cameraSource.stop();
-                                Timber.d("intentData: %s",intentData);
-                                getBalance(intentData.trim());
-                            }
-                            else Toast.makeText(context, "Please enter a valid address", Toast.LENGTH_SHORT).show();
+                                Timber.d("intentData: %s", intentData);
+                                address = intentData.trim();
+                                if (binding.rbBalance.isChecked()) {
+                                    getBalance(address);
+                                } else {
+                                    getTransaction(address);
+                                }
+                            } else
+                                Toast.makeText(context, "Please enter a valid address", Toast.LENGTH_SHORT).show();
                         } catch (Exception e) {
                             Timber.e(e.getCause());
                         }

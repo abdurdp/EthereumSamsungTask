@@ -12,4 +12,13 @@ public interface HomeAPI {
                                         @Query("tag") String tag,
                                         @Query("apikey") String apikey
     );
+
+    @GET("api?")
+    Call<BlockChainTransactionResponse> getTransaction(@Query("module") String module,
+                                                       @Query("action") String action,
+                                                       @Query("address") String address,
+                                                       @Query("startblock") int startblock,
+                                                       @Query("endblock") int endblock,
+                                                       @Query("apikey") String apikey
+    );
 }

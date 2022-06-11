@@ -29,7 +29,7 @@ public class HomeRepository {
 
     public MutableLiveData<BlockChainResponse> getBalance(String address) {
         MutableLiveData<BlockChainResponse> data = new MutableLiveData<>();
-        homeAPI.getBalance("account","balance",address,"latest", BuildConfig.API_KEY).enqueue(new Callback<BlockChainResponse>() {
+        homeAPI.getBalance("account", "balance", address, "latest", BuildConfig.API_KEY).enqueue(new Callback<BlockChainResponse>() {
             @Override
             public void onResponse(@NonNull Call<BlockChainResponse> call,
                                    @NonNull Response<BlockChainResponse> response) {
@@ -55,4 +55,31 @@ public class HomeRepository {
         return data;
     }
 
+    public MutableLiveData<BlockChainTransactionResponse> getTransaction(String address) {
+        MutableLiveData<BlockChainTransactionResponse> data = new MutableLiveData<>();
+        homeAPI.getTransaction("account", "txlist", address, 0, 40, BuildConfig.API_KEY).enqueue(new Callback<BlockChainTransactionResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<BlockChainTransactionResponse> call,
+                                   @NonNull Response<BlockChainTransactionResponse> response) {
+
+                if (response.isSuccessful()) {
+                    data.setValue(response.body());
+                } else {
+                    BlockChainTransactionResponse apiResponse = new BlockChainTransactionResponse();
+                    apiResponse.setError(true);
+                    if (response.body() != null) {
+                        apiResponse.setMessage(response.body().getMessage());
+                    }
+                    data.setValue(apiResponse);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<BlockChainTransactionResponse> call, @NonNull Throwable t) {
+                Timber.e(t.getCause());
+                data.setValue(null);
+            }
+        });
+        return data;
+    }
 }

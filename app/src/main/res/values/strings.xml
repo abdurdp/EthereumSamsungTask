@@ -7,4 +7,7 @@
     <string name="submit">submit</string>
     <string name="qr_code_image">Qr code image</string>
     <string name="cancel_scanner">cancel scanner</string>
+    <string name="transaction">Transaction</string>
+    <string name="close">close</string>
+    <string name="transaction_details">Transaction Details</string>
 </resources>
